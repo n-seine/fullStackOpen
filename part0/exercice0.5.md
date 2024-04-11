@@ -4,13 +4,32 @@ sequenceDiagram
     participant browser
     participant server
 
- Note right of browser: The browser add the new note to local array
-Note right of browser: The browser rerenders list of notes, including the new one
 
-    browser->>server: POST https://studies.cs.helsinki.fi/exampleapp/new_note_spa
+    browser->>server: GET https://studies.cs.helsinki.fi/exampleapp/spa
     activate server
-     Note left of server: The server adds the new note to the database (notes.push({content:"", date:""}))
-    server-->>browser: created (201)
-      Note right of browser: No page refresh or redirect
+    server-->>browser: HTML file (200)
     deactivate server
+
+    Note right of browser: Different html file than the static version
+
+    browser->>server: GET https://studies.cs.helsinki.fi/exampleapp/main.css
+    activate server
+    server-->>browser: CSS file (200)
+    deactivate server
+    Note right of browser: Same CSS file than the static version
+
+    browser->>server: GET https://studies.cs.helsinki.fi/exampleapp/spa.js
+    activate server
+    server-->>browser: the JavaScript file
+    deactivate server
+    Note right of browser: Different JS file than the static version
+
+
+
+    browser->>server: GET https://studies.cs.helsinki.fi/exampleapp/data.json
+    activate server
+    server-->>browser: [note1, note2, ...]
+    deactivate server
+
+    Note right of browser: Same JSON, same data
 ```
