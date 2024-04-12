@@ -12,25 +12,57 @@ const App = () => {
     "The only way to go fast, is to go well.",
   ];
 
+  const getInitialVotes = () => {
+    let votes = [];
+    for (let i = 0; i < anecdotes.length; i++) {
+      votes.push({ anecdote: i, votes: 0 });
+    }
+    return votes;
+  };
+  const initialVotes = getInitialVotes();
+  const [votes, setVotes] = useState(initialVotes);
   const [selected, setSelected] = useState(0);
+  const topRatedAnecdote = votes.find(
+    (anecdote) =>
+      anecdote.votes === Math.max(...votes.map((anecdote) => anecdote.votes))
+  );
 
   const selectAnotherAnecdote = (current) => {
-    const newAnecdote = Math.floor(Math.random() * anecdotes.length);
-    if (newAnecdote === current) {
-      return selectAnotherAnecdote(current);
+    let newAnecdote = Math.floor(Math.random() * anecdotes.length);
+    while (newAnecdote === current) {
+      newAnecdote = Math.floor(Math.random() * anecdotes.length);
     }
-    return newAnecdote;
+    setSelected(newAnecdote);
+  };
+
+  const handleVote = (anecdoteIndex) => {
+    const anecdote = votes.find((vote) => vote.anecdote === anecdoteIndex);
+    const newVotes = votes
+      .filter((vote) => vote.anecdote !== anecdoteIndex)
+      .concat({
+        anecdote: anecdoteIndex,
+        votes: anecdote.votes + 1,
+      });
+    setVotes(newVotes);
   };
   return (
     <main>
+      <h1>Random dev anecdote</h1>
+
       <div>{anecdotes[selected]}</div>
       <button
         onClick={() => {
-          setSelected(selectAnotherAnecdote(selected));
+          selectAnotherAnecdote(selected);
         }}
       >
         Pick an anecdote
       </button>
+      <button onClick={() => handleVote(selected)}>Vote</button>
+      <div>
+        <h1>Anecdote with most votes</h1>
+        <p>{anecdotes[topRatedAnecdote.anecdote]}</p>
+        <p>is the best one, with {topRatedAnecdote.votes} votes</p>
+      </div>
     </main>
   );
 };
