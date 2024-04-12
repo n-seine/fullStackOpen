@@ -6,9 +6,10 @@ const RateButton = ({ handleClick, text }) => {
 
 const StatisticLine = ({ text, value }) => {
   return (
-    <li>
-      {text} {value}
-    </li>
+    <tr>
+      <td>{text}</td>
+      <td style={{ paddingLeft: "20px" }}>{value}</td>
+    </tr>
   );
 };
 
@@ -17,14 +18,16 @@ const Statistics = ({ good, neutral, bad, total, average, positive }) => {
     return <p>No feedback given</p>;
   }
   return (
-    <ul>
-      <StatisticLine text="good" value={good} />
-      <StatisticLine text="neutral" value={neutral} />
-      <StatisticLine text="bad" value={bad} />
-      <StatisticLine text="all" value={total} />
-      <StatisticLine text="average" value={average} />
-      <StatisticLine text="% of positive values" value={positive} />
-    </ul>
+    <table style={{ marginTop: "20px" }}>
+      <tbody>
+        <StatisticLine text="good" value={good} />
+        <StatisticLine text="neutral" value={neutral} />
+        <StatisticLine text="bad" value={bad} />
+        <StatisticLine text="all" value={total} />
+        <StatisticLine text="average" value={average} />
+        <StatisticLine text="% of positive values" value={positive} />
+      </tbody>
+    </table>
   );
 };
 
