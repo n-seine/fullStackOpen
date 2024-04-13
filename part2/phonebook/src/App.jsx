@@ -7,6 +7,29 @@ import {
   updateContact,
 } from "./lib/server";
 
+const Toast = ({ toast }) => {
+  if (toast === null) {
+    return null;
+  }
+
+  const toastStyles = {
+    color: "white",
+    background: toast.style === "alert" ? "red" : "green",
+    fontSize: 16,
+    borderStyle: "solid",
+    borderRadius: 5,
+    padding: 10,
+    marginBottom: 10,
+    position: "fixed",
+    top: 10,
+    right: 10,
+  };
+  return (
+    <div className="toast" style={toastStyles}>
+      {toast.message}
+    </div>
+  );
+};
 const Filter = ({ filter, setFilter }) => {
   const handleFilterInput = (event) => {
     setFilter(event.target.value);
@@ -28,6 +51,8 @@ const Filter = ({ filter, setFilter }) => {
 const AddPerson = ({ persons, setPersons }) => {
   const [newName, setNewName] = useState("");
   const [newPhone, setNewPhone] = useState("");
+  const [notification, setNotification] = useState({ message: "", style: "" });
+
   const handleNewNameInput = (event) => {
     setNewName(event.target.value);
   };
@@ -43,40 +68,69 @@ const AddPerson = ({ persons, setPersons }) => {
       confirm(
         `${newName} is already in the phonebook, replace the old number with a new one?`
       ) &&
-        updateContact({ ...existingPerson, number: newPhone }) &&
+        updateContact({ ...existingPerson, number: newPhone }).catch((err) => {
+          setNotification({
+            message: `${existingPerson.name} was already removed from the server`,
+            style: "alert",
+          });
+          setTimeout(() => {
+            setNotification(null);
+          }, 3000);
+        }) &&
         setPersons(
           persons.map((p) =>
             p.name === newName ? { ...p, number: newPhone } : p
           )
         );
+      setNotification({
+        message: `Success !  ${newName} updated in the phonebook `,
+      });
+
+      setTimeout(() => {
+        setNotification(null);
+      }, 3000);
     } else {
       const newPerson = { name: newName, number: newPhone };
       addContact(newPerson).then((createdPerson) => {
         setPersons(persons.concat(createdPerson));
       });
+      setNotification({
+        message: `Success !  ${newName} added to the phonebook `,
+      });
+
+      setTimeout(() => {
+        setNotification(null);
+      }, 3000);
     }
     setNewName("");
     setNewPhone("");
   };
 
   return (
-    <form onSubmit={handleNewPersonSubmit}>
-      <h2>Add someone in your phonebook</h2>
+    <>
+      <form onSubmit={handleNewPersonSubmit}>
+        <h2>Add someone in your phonebook</h2>
 
-      <div>
-        <label htmlFor="newName">name:</label>
-        <input id="newName" value={newName} onChange={handleNewNameInput} />
-      </div>
+        <div>
+          <label htmlFor="newName">name:</label>
+          <input id="newName" value={newName} onChange={handleNewNameInput} />
+        </div>
 
-      <div>
-        <label htmlFor="newPhone">phone:</label>
-        <input id="newPhone" value={newPhone} onChange={handleNewPhoneInput} />
-      </div>
+        <div>
+          <label htmlFor="newPhone">phone:</label>
+          <input
+            id="newPhone"
+            value={newPhone}
+            onChange={handleNewPhoneInput}
+          />
+        </div>
 
-      <div>
-        <button type="submit">Add to phonebook</button>
-      </div>
-    </form>
+        <div>
+          <button type="submit">Add to phonebook</button>
+        </div>
+      </form>
+      <Toast toast={notification} />
+    </>
   );
 };
 const ContactsList = ({ persons, setPersons, filter }) => {
