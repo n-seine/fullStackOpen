@@ -1,4 +1,6 @@
+import { useEffect } from "react";
 import { useState } from "react";
+import axios from "axios";
 
 const Filter = ({ filter, setFilter }) => {
   const handleFilterInput = (event) => {
@@ -65,7 +67,9 @@ const AddPerson = ({ persons, setPersons }) => {
 const ContactsList = ({ persons, filter }) => {
   const contactsToDisplay =
     filter.length > 0
-      ? persons.filter((p) => p.name.includes(filter))
+      ? persons.filter((p) =>
+          p.name.toLowerCase().includes(filter.toLowerCase())
+        )
       : persons;
   return (
     <div>
@@ -75,8 +79,8 @@ const ContactsList = ({ persons, filter }) => {
       ) : (
         <ul>
           {contactsToDisplay.map((person) => (
-            <li key={person.name}>
-              {person.name} : {person.phone}
+            <li key={person.id}>
+              {person.name} : {person.number}
             </li>
           ))}
         </ul>
@@ -85,17 +89,16 @@ const ContactsList = ({ persons, filter }) => {
   );
 };
 const App = () => {
-  const [persons, setPersons] = useState([
-    { name: "Arto Hellas", phone: "01 23 45 68 90" },
-    { name: "Vincent Van Gogh", phone: "06 00 00 00 00" },
-    { name: "Gustav Klimt", phone: "07 00 00 00 00" },
-    { name: "Pablo Picasso", phone: "08 00 74 34 00" },
-    { name: "Claude Monet", phone: "09 00 08 00 00" },
-    { name: "Salvador Dali", phone: "10 00 00 00 00" },
-    { name: "Edvard Munch", phone: "11 00 00 00 00" },
-    { name: "Jackson Pollock", phone: "12 00 00 00 00" },
-  ]);
+  const [persons, setPersons] = useState([]);
   const [filter, setFilter] = useState("");
+  useEffect(() => {
+    axios
+      .get("http://localhost:3001/persons")
+      .then((response) => {
+        setPersons(response.data);
+      })
+      .then(console.log("data loaded"));
+  }, []);
 
   return (
     <div>
