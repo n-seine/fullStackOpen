@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { useState } from "react";
-import axios from "axios";
+import { addContact, getAllContacts } from "./lib/server";
 
 const Filter = ({ filter, setFilter }) => {
   const handleFilterInput = (event) => {
@@ -31,19 +31,20 @@ const AddPerson = ({ persons, setPersons }) => {
     setNewPhone(event.target.value);
   };
   const handleNewPersonSubmit = (event) => {
-    const handleDuplicateName = () => {
-      alert(`${newName} is already added to phonebook`);
-    };
     event.preventDefault();
-    if (persons.some((person) => person.name === newName)) {
-      handleDuplicateName();
+    const existingPerson = persons.find((person) => person.name === newName);
+    if (existingPerson) {
+      alert(`${newName} is already added to phonebook`);
     } else {
-      const newPersons = [...persons, { name: newName, phone: newPhone }];
-      setPersons(newPersons);
+      const newPerson = { name: newName, number: newPhone };
+      addContact(newPerson).then((createdPerson) => {
+        setPersons(persons.concat(createdPerson));
+      });
+      setNewName("");
+      setNewPhone("");
     }
-    setNewName("");
-    setNewPhone("");
   };
+
   return (
     <form onSubmit={handleNewPersonSubmit}>
       <h2>Add someone in your phonebook</h2>
@@ -92,11 +93,8 @@ const App = () => {
   const [persons, setPersons] = useState([]);
   const [filter, setFilter] = useState("");
   useEffect(() => {
-    axios
-      .get("http://localhost:3001/persons")
-      .then((response) => {
-        setPersons(response.data);
-      })
+    getAllContacts
+      .then((data) => setPersons(data))
       .then(console.log("data loaded"));
   }, []);
 
