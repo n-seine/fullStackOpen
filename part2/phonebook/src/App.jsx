@@ -1,6 +1,11 @@
 import { useEffect } from "react";
 import { useState } from "react";
-import { addContact, getAllContacts } from "./lib/server";
+import {
+  addContact,
+  deleteContact,
+  getAllContacts,
+  updateContact,
+} from "./lib/server";
 
 const Filter = ({ filter, setFilter }) => {
   const handleFilterInput = (event) => {
@@ -34,15 +39,24 @@ const AddPerson = ({ persons, setPersons }) => {
     event.preventDefault();
     const existingPerson = persons.find((person) => person.name === newName);
     if (existingPerson) {
-      alert(`${newName} is already added to phonebook`);
+      console.log("existingPerson", existingPerson);
+      confirm(
+        `${newName} is already in the phonebook, replace the old number with a new one?`
+      ) &&
+        updateContact({ ...existingPerson, number: newPhone }) &&
+        setPersons(
+          persons.map((p) =>
+            p.name === newName ? { ...p, number: newPhone } : p
+          )
+        );
     } else {
       const newPerson = { name: newName, number: newPhone };
       addContact(newPerson).then((createdPerson) => {
         setPersons(persons.concat(createdPerson));
       });
-      setNewName("");
-      setNewPhone("");
     }
+    setNewName("");
+    setNewPhone("");
   };
 
   return (
@@ -65,13 +79,18 @@ const AddPerson = ({ persons, setPersons }) => {
     </form>
   );
 };
-const ContactsList = ({ persons, filter }) => {
+const ContactsList = ({ persons, setPersons, filter }) => {
   const contactsToDisplay =
     filter.length > 0
       ? persons.filter((p) =>
           p.name.toLowerCase().includes(filter.toLowerCase())
         )
       : persons;
+
+  const handleDelete = (person) => {
+    confirm(`Delete ${person.name} ?`) && deleteContact(person.id);
+    setPersons(persons.filter((p) => p.id !== person.id));
+  };
   return (
     <div>
       <h2>Numbers</h2>
@@ -81,7 +100,8 @@ const ContactsList = ({ persons, filter }) => {
         <ul>
           {contactsToDisplay.map((person) => (
             <li key={person.id}>
-              {person.name} : {person.number}
+              {person.name} : {person.number}{" "}
+              <button onClick={() => handleDelete(person)}>delete</button>
             </li>
           ))}
         </ul>
@@ -103,7 +123,7 @@ const App = () => {
       <h1>Phonebook</h1>
       <Filter filter={filter} setFilter={setFilter} />
       <AddPerson persons={persons} setPersons={setPersons} />
-      <ContactsList persons={persons} filter={filter} />{" "}
+      <ContactsList persons={persons} setPersons={setPersons} filter={filter} />
     </div>
   );
 };

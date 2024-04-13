@@ -7,5 +7,12 @@ const getAllContacts = axios.get(baseURL).then((response) => {
 });
 const addContact = (person) =>
   axios.post(baseURL, person).then((response) => response.data);
+const deleteContact = (id) =>
+  axios.delete(`${baseURL}/${id}`).then((response) => response.data);
 
-export { getAllContacts, addContact };
+const updateContact = (newPerson) =>
+  axios
+    .put(`${baseURL}/${newPerson.id}`, newPerson)
+    .then((response) => response.data);
+
+export { getAllContacts, addContact, updateContact, deleteContact };
