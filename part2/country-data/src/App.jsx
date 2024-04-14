@@ -15,37 +15,41 @@ const ResultsLine = ({ country, setResults }) => (
   </li>
 );
 
-const SearchResults = ({ results, setResults }) => (
-  <div>
-    {results.length > 10 ? (
-      "Too many matches, specify another filter"
-    ) : results.length === 0 ? (
-      "No country found"
-    ) : results.length === 1 ? (
-      ""
-    ) : (
-      <ul>
-        {results.map((country) => (
-          <ResultsLine
-            key={country.cca3}
-            country={country}
-            setResults={setResults}
-          />
-        ))}
-      </ul>
-    )}
-  </div>
-);
-
-const Search = ({ fullList, results, setResults }) => {
-  const [filter, setFilter] = useState("");
-  const handleFilter = (event) => {
-    setFilter(event.target.value);
+const SearchResults = ({ results, setResults, fullList, filter }) => {
+  useEffect(() => {
     const filteredCountries = fullList.filter((country) =>
       country.name.common.toLowerCase().includes(filter.toLowerCase())
     );
     console.log("filteredCountries", filteredCountries);
     setResults(filteredCountries);
+  }, [filter, setResults, fullList]);
+  return (
+    <div>
+      {results.length > 10 ? (
+        "Too many matches, specify another filter"
+      ) : results.length === 0 ? (
+        "No country found"
+      ) : results.length === 1 ? (
+        ""
+      ) : (
+        <ul>
+          {results.map((country) => (
+            <ResultsLine
+              key={country.cca3}
+              country={country}
+              setResults={setResults}
+            />
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+};
+
+const Search = ({ fullList, results, setResults }) => {
+  const [filter, setFilter] = useState("");
+  const handleFilter = (event) => {
+    setFilter(event.target.value);
   };
 
   return (
@@ -57,7 +61,12 @@ const Search = ({ fullList, results, setResults }) => {
       {filter === "" ? (
         <p>Search for countries to display fascinating data !</p>
       ) : (
-        <SearchResults results={results} setResults={setResults} />
+        <SearchResults
+          results={results}
+          setResults={setResults}
+          fullList={fullList}
+          filter={filter}
+        />
       )}
     </>
   );
@@ -86,6 +95,33 @@ const CountryData = ({ country }) => (
   </section>
 );
 
+const Weather = ({ country }) => {
+  const [weather, setWeather] = useState([]);
+  useEffect(() => {
+    fetch(
+      `https://api.open-meteo.com/v1/forecast?latitude=${country.capitalInfo.latlng[0]}&longitude=${country.capitalInfo.latlng[0]}&current=temperature_2m,precipitation,wind_speed_10m&hourly=temperature_2m`
+    ).then((response) => {
+      response.json().then((data) => {
+        setWeather(data);
+      });
+    });
+    console.log("weather", weather);
+  }, [country]);
+  return (
+    <section>
+      <h1>Weather in {country.capital[0]}</h1>
+
+      {weather.current && (
+        <>
+          <p>Precipitation : {weather.current.precipitation} mm </p>
+          <p>Temperature : {weather.current.temperature_2m} °</p>
+          <p>Wind Speed : {weather.current.wind_speed_10m} m/s</p>
+        </>
+      )}
+    </section>
+  );
+};
+
 const App = () => {
   const [fullCountries, seFullCountries] = useState([]);
   const [results, setResults] = useState([]);
@@ -104,7 +140,13 @@ const App = () => {
         results={results}
         setResults={setResults}
       />
-      {results.length === 1 ? <CountryData country={results[0]} /> : ""}
+      {results.length === 1 ? (
+        <>
+          <CountryData country={results[0]} /> <Weather country={results[0]} />
+        </>
+      ) : (
+        ""
+      )}
     </>
   );
 };
