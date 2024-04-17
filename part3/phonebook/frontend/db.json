@@ -1,0 +1,24 @@
+{
+  "persons": [
+    {
+      "name": "Arto Hellas",
+      "number": "040-123456",
+      "id": "1"
+    },
+    {
+      "id": "3cf0",
+      "name": "Jon Snow",
+      "number": "96 56 4564-56"
+    },
+    {
+      "id": "c739",
+      "name": "Bill Gates",
+      "number": "+43 98 78 4439 89"
+    },
+    {
+      "id": "7e04",
+      "name": "Steve Jobs",
+      "number": "09897878787"
+    }
+  ]
+}
