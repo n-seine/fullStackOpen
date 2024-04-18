@@ -68,42 +68,61 @@ const AddPerson = ({ persons, setPersons }) => {
       confirm(
         `${newName} is already in the phonebook, replace the old number with a new one?`
       ) &&
-        updateContact({ ...existingPerson, number: newPhone }).catch((err) => {
+        updateContact({ ...existingPerson, number: newPhone })
+          .then(() => {
+            setNotification({
+              message: `Success !  ${newName} updated in the phonebook `,
+            });
+            setTimeout(() => {
+              setNotification(null);
+            }, 3000);
+          })
+          .then(
+            setPersons(
+              persons.map((p) =>
+                p.name === newName ? { ...p, number: newPhone } : p
+              )
+            )
+          )
+          .catch((err) => {
+            setNotification({
+              message: err.response.data.error,
+              style: "alert",
+            });
+            setTimeout(() => {
+              setNotification(null);
+            }, 3000);
+          });
+    } else {
+      const newPerson = { name: newName, number: newPhone };
+      addContact(newPerson)
+        .then((createdPerson) => {
+          setPersons(persons.concat(createdPerson));
+        })
+        .then(
+          setTimeout(() => {
+            setNotification(null);
+          }, 3000)
+        )
+        .then(() => {
           setNotification({
-            message: `${existingPerson.name} was already removed from the server`,
+            message: `Success !  ${newName} added to the phonebook `,
+            style: "success",
+          });
+        })
+        .catch((err) => {
+          console.log("err", err);
+          setNotification({
+            message: err.response.data.error,
             style: "alert",
           });
           setTimeout(() => {
             setNotification(null);
           }, 3000);
-        }) &&
-        setPersons(
-          persons.map((p) =>
-            p.name === newName ? { ...p, number: newPhone } : p
-          )
-        );
-      setNotification({
-        message: `Success !  ${newName} updated in the phonebook `,
-      });
-
-      setTimeout(() => {
-        setNotification(null);
-      }, 3000);
-    } else {
-      const newPerson = { name: newName, number: newPhone };
-      addContact(newPerson).then((createdPerson) => {
-        setPersons(persons.concat(createdPerson));
-      });
-      setNotification({
-        message: `Success !  ${newName} added to the phonebook `,
-      });
-
-      setTimeout(() => {
-        setNotification(null);
-      }, 3000);
+        });
+      setNewName("");
+      setNewPhone("");
     }
-    setNewName("");
-    setNewPhone("");
   };
 
   return (

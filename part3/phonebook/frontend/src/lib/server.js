@@ -6,7 +6,10 @@ const getAllContacts = axios.get(baseURL).then((response) => {
   return response.data;
 });
 const addContact = (person) =>
-  axios.post(baseURL, person).then((response) => response.data);
+  axios.post(baseURL, person).then((response) => {
+    console.log("response", response.data);
+    return response.data;
+  });
 const deleteContact = (id) =>
   axios.delete(`${baseURL}/${id}`).then((response) => response.data);
 
