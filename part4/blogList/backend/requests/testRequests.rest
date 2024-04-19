@@ -1,0 +1,27 @@
+GET http://localhost:3003/api/blogs HTTP/1.1
+Content-Type: application/json
+
+###
+
+GET http://localhost:3003/api/blogs/6622b61b4964c1eb1e07c83a HTTP/1.1
+Content-Type: application/json
+
+###
+
+POST http://localhost:3003/api/blogs HTTP/1.1
+Content-Type: application/json
+
+{"title": "A new post",
+  "author": "Marcel Proust",
+  "url": "www.newpost.com",
+  "likes": "43"}
+
+
+###
+POST http://localhost:3003/api/blogs HTTP/1.1
+Content-Type: application/json
+
+{"title": "A second post",
+  "author": "Emile Zola",
+  "url": "www.newpost.com",
+  "likes": "43"}
