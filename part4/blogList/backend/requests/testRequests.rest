@@ -3,7 +3,7 @@ Content-Type: application/json
 
 ###
 
-GET http://localhost:3003/api/blogs/6622b61b4964c1eb1e07c83a HTTP/1.1
+GET http://localhost:3003/api/blogs/662529321fc32f079p38c48c HTTP/1.1
 Content-Type: application/json
 
 ###
