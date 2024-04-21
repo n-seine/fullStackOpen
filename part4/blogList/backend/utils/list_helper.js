@@ -12,7 +12,6 @@ const favoriteBlog = (blogs) => {
     return "no blogs";
   }
   const topBlogPost = blogs.sort((a, b) => b.likes - a.likes)[0];
-  console.log("topBlogpost", topBlogPost);
   return {
     author: topBlogPost.author,
     title: topBlogPost.title,

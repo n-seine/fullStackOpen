@@ -9,7 +9,7 @@ const testHelper = require("./testsHelper");
 beforeEach(async () => testHelper.initializeBlogs());
 
 const api = supertest(app);
-describe("HTTP requests are handled properly", () => {
+describe("Blogs are correctly retrieved", () => {
   test("GET /api/blogs returns JSON", async () => {
     await api
       .get("/api/blogs")
@@ -22,7 +22,8 @@ describe("HTTP requests are handled properly", () => {
     const listOfIds = response.body.map((b) => b.id);
     assert(listOfIds.every((id) => typeof id === "string"));
   });
-
+});
+describe("blogs can be added", () => {
   test("a new blog can be added", async () => {
     const initialLength = testHelper.initialBlogs.length;
     const newBlog = {
@@ -73,6 +74,35 @@ describe("HTTP requests are handled properly", () => {
       author: "Edsger W. Dijkstra",
     };
     await api.post("/api/blogs").send(blogWithoutTitle).expect(400);
+  });
+});
+
+describe("blogs can be deleted", () => {
+  test("a blog can be deleted", async () => {
+    const initialLength = testHelper.initialBlogs.length;
+    const blogToDelete = testHelper.initialBlogs[0];
+
+    await api.delete(`/api/blogs/${blogToDelete._id}`).expect(204);
+    const response = await api.get("/api/blogs");
+    const body = response.body;
+    assert.strictEqual(body.length, initialLength - 1);
+    const deletedBlog = body.find((blog) => blog.id === blogToDelete.id);
+    assert.deepStrictEqual(deletedBlog, undefined);
+  });
+});
+
+describe("blogs can be updated", () => {
+  test("a blog can be updated", async () => {
+    const blogToUpdate = testHelper.initialBlogs[0];
+    blogToUpdate.likes = 100;
+    await api
+      .put(`/api/blogs/${blogToUpdate._id}`)
+      .send(blogToUpdate)
+      .expect(200);
+    const response = await api.get("/api/blogs");
+    const body = response.body;
+    const updatedBlog = body.find((blog) => blog.id === blogToUpdate._id);
+    assert.deepStrictEqual(updatedBlog.likes, 100);
   });
 });
 
