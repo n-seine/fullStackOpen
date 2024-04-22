@@ -1,10 +1,10 @@
 const { test, after, beforeEach, describe } = require("node:test");
 const assert = require("node:assert");
-const mongoose = require("mongoose");
 const supertest = require("supertest");
 const app = require("../app");
 const Blog = require("../models/blog");
 const testHelper = require("./testsHelper");
+const mongoose = require("mongoose");
 
 beforeEach(async () => testHelper.initializeBlogs());
 
@@ -75,6 +75,23 @@ describe("blogs can be added", () => {
     };
     await api.post("/api/blogs").send(blogWithoutTitle).expect(400);
   });
+
+  test("user is correctly added to blog", async () => {
+    const newBlog = {
+      title: "A newly added blog",
+      author: "Edsger W. Dijkstra",
+      url: "http://www.cs.utexas.edu/~EWD/transcriptions/EWD08xx/EWD808.html",
+      likes: 12,
+    };
+    const response = await api
+      .post("/api/blogs")
+      .send(newBlog)
+      .expect(201)
+      .expect("Content-Type", /application\/json/);
+
+    const addedBlog = response.body;
+    assert.deepStrictEqual(addedBlog.user.username, "tester");
+  });
 });
 
 describe("blogs can be deleted", () => {
@@ -106,4 +123,6 @@ describe("blogs can be updated", () => {
   });
 });
 
-after(async () => await mongoose.connection.close());
+after(async () => {
+  await testHelper.closeConnection();
+});

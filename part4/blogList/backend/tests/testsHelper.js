@@ -1,8 +1,9 @@
 const Blog = require("../models/blog");
-
+const User = require("../models/user");
+const mongoose = require("mongoose");
 const initialBlogs = [
   {
-    _id: "5a422a851b54a676234d17f7",
+    _id: "5a422a851b54a676234d17f5",
     title: "React patterns",
     author: "Michael Chan",
     url: "https://reactpatterns.com/",
@@ -29,7 +30,7 @@ const initialBlogs = [
 
 const listWithOneBlog = [
   {
-    _id: "5a422aa71b54a676234d17f8",
+    _id: "5a422aa71b54a676234d17g8",
     title: "Go To Statement Considered Harmful",
     author: "Edsger W. Dijkstra",
     url: "http://www.u.arizona.edu/~rubinson/copyright_violations/Go_To_Considered_Harmful.html",
@@ -39,10 +40,41 @@ const listWithOneBlog = [
 ];
 const emptyBlogs = [];
 
+const closeConnection = async () => {
+  await mongoose.connection.close();
+};
+
 const initializeBlogs = async () => {
   await Blog.deleteMany({});
-  const promiseArray = initialBlogs.map((blog) => new Blog(blog).save());
+  const user = await User.findOne({ username: "tester" });
+  const promiseArray = initialBlogs.map((blog) =>
+    new Blog({ ...blog, user }).save()
+  );
   await Promise.all(promiseArray);
+};
+
+const testUsers = [
+  {
+    username: "tester",
+    name: "Test User",
+    password: "tester",
+  },
+  {
+    username: "tester2",
+    name: "Test User 2",
+    password: "tester2",
+  },
+];
+
+const initializeUsers = async () => {
+  await User.deleteMany({});
+  const promiseArray = testUsers.map((user) => new User(user).save());
+  await Promise.all(promiseArray);
+  console.log("users created");
+};
+const usersInDb = async () => {
+  const users = await User.find({});
+  return users.map((u) => u.toJSON());
 };
 
 module.exports = {
@@ -50,4 +82,8 @@ module.exports = {
   initializeBlogs,
   listWithOneBlog,
   emptyBlogs,
+  usersInDb,
+  initializeUsers,
+  testUsers,
+  closeConnection,
 };
