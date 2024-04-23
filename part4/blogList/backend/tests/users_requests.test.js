@@ -5,25 +5,31 @@ const app = require("../app");
 const User = require("../models/user");
 const testHelper = require("./testsHelper");
 
+const api = supertest(app);
+
 beforeEach(async () => {
   await testHelper.initializeUsers();
 });
 
-const api = supertest(app);
 describe("users are correctly created", () => {
   test("POST /api/users increases users number by 1", async () => {
-    const initialLength = testHelper.testUsers.length;
+    console.log("users in db at the start", await testHelper.usersInDb());
+
+    const initialLength = testHelper.testUsers.length + 1;
     const newUser = {
       username: "newUser",
       name: "New User",
       password: "newUser",
     };
+
+    console.log("users in db now", await testHelper.usersInDb());
     await api
       .post("/api/users")
       .send(newUser)
       .expect(201)
       .expect("Content-Type", /application\/json/);
     const usersInDb = await testHelper.usersInDb();
+    console.log(usersInDb);
     assert.strictEqual(usersInDb.length, initialLength + 1);
   });
 
@@ -31,9 +37,11 @@ describe("users are correctly created", () => {
     const newUser = {
       name: "New User",
     };
+    const initialLength = testHelper.testUsers.length + 1;
+
     await api.post("/api/users").send(newUser).expect(400);
     const usersInDb = await testHelper.usersInDb();
-    assert.strictEqual(usersInDb.length, testHelper.testUsers.length);
+    assert.strictEqual(usersInDb.length, initialLength);
   });
 
   test("username must be unique", async () => {
@@ -43,8 +51,9 @@ describe("users are correctly created", () => {
       password: "tester",
     };
     const response = await api.post("/api/users").send(newUser).expect(400);
-    console.log("response", response);
     const usersInDb = await testHelper.usersInDb();
+    console.log("unique username users", usersInDb);
+
     assert.strictEqual(usersInDb.length, testHelper.testUsers.length);
     assert(response.text.includes("username"));
   });
@@ -55,9 +64,12 @@ describe("users are correctly created", () => {
       name: "New User",
       password: "a",
     };
+    const initialLength = testHelper.testUsers.length + 1;
+
     const response = await api.post("/api/users").send(newUser).expect(400);
     const usersInDb = await testHelper.usersInDb();
-    assert.strictEqual(usersInDb.length, testHelper.testUsers.length);
+    console.log("password length users", usersInDb);
+    assert.strictEqual(usersInDb.length, initialLength);
     assert(response.text.includes("password"));
   });
 
@@ -67,11 +79,16 @@ describe("users are correctly created", () => {
       name: "New User",
       password: "newUser",
     };
+    const initialLength = testHelper.testUsers.length + 1;
+
     const response = await api.post("/api/users").send(newUser).expect(400);
     const usersInDb = await testHelper.usersInDb();
-    assert.strictEqual(usersInDb.length, testHelper.testUsers.length);
+    assert.strictEqual(usersInDb.length, initialLength);
     assert(response.text.includes("username"));
   });
 });
 
-after(async () => testHelper.closeConnection());
+after(async () => {
+  User.deleteMany({});
+  testHelper.closeConnection();
+});

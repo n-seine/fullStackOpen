@@ -1,6 +1,8 @@
 const Blog = require("../models/blog");
 const User = require("../models/user");
 const mongoose = require("mongoose");
+const jwt = require("jsonwebtoken");
+
 const initialBlogs = [
   {
     _id: "5a422a851b54a676234d17f5",
@@ -45,12 +47,39 @@ const closeConnection = async () => {
 };
 
 const initializeBlogs = async () => {
+  console.log("initializing blogs");
   await Blog.deleteMany({});
-  const user = await User.findOne({ username: "tester" });
+  await User.deleteMany({});
+  await User.create({
+    username: "blogtester",
+    password: "tester",
+  });
+  const user = await User.findOne({ username: "blogtester" });
   const promiseArray = initialBlogs.map((blog) =>
     new Blog({ ...blog, user }).save()
   );
   await Promise.all(promiseArray);
+};
+
+const initializeUsers = async () => {
+  console.log("initializing users");
+  console.log("users in DB 1", (await usersInDb()).length);
+  await User.deleteMany({});
+  console.log("users in DB 2", (await usersInDb()).length);
+  const promiseArray = testUsers.map((user) => new User(user).save());
+  await Promise.all(promiseArray);
+  console.log("users in DB 3", (await usersInDb()).length);
+
+  console.log("users created");
+};
+const usersInDb = async () => {
+  const users = await User.find({});
+  return users.map((u) => u.toJSON());
+};
+const getToken = async () => {
+  const user = await User.findOne({ username: "blogtester" });
+  const token = jwt.sign({ id: user._id }, process.env.SECRET);
+  return token;
 };
 
 const testUsers = [
@@ -66,17 +95,6 @@ const testUsers = [
   },
 ];
 
-const initializeUsers = async () => {
-  await User.deleteMany({});
-  const promiseArray = testUsers.map((user) => new User(user).save());
-  await Promise.all(promiseArray);
-  console.log("users created");
-};
-const usersInDb = async () => {
-  const users = await User.find({});
-  return users.map((u) => u.toJSON());
-};
-
 module.exports = {
   initialBlogs,
   initializeBlogs,
@@ -86,4 +104,5 @@ module.exports = {
   initializeUsers,
   testUsers,
   closeConnection,
+  getToken,
 };

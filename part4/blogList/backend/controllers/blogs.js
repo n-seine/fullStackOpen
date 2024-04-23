@@ -1,7 +1,7 @@
 const Blog = require("../models/blog");
 const User = require("../models/user");
 const blogRouter = require("express").Router();
-
+const jwt = require("jsonwebtoken");
 blogRouter.get("/", async (request, response, next) => {
   try {
     const blogs = await Blog.find({}).populate("user", {
@@ -30,11 +30,17 @@ blogRouter.get("/:id", async (request, response, next) => {
 
 blogRouter.post("/", async (request, response, next) => {
   try {
-    const blog = new Blog(request.body);
-    blog.user ||= (await User.find({}))[0];
-    console.log("user", blog.user);
-    const savedBlog = await blog.save();
-    response.status(201).json(savedBlog);
+    if (!request.user) {
+      return response.status(400).json({ error: "token missing or invalid" });
+    } else {
+      const user = request.user;
+      const blog = new Blog({
+        ...request.body,
+        user: user._id,
+      });
+      const savedBlog = await blog.save();
+      response.status(201).json(savedBlog);
+    }
   } catch (error) {
     next(error);
   }
@@ -42,8 +48,26 @@ blogRouter.post("/", async (request, response, next) => {
 
 blogRouter.delete("/:id", async (request, response, next) => {
   try {
-    await Blog.findByIdAndDelete(request.params.id);
-    response.status(204).end();
+    const user = request.user;
+    if (!request.user) {
+      return response.status(401).json({ error: "token missing or invalid" });
+    } else {
+      const blogToDelete = await Blog.findById(request.params.id);
+      if (!blogToDelete) {
+        return response.status(404).json({ error: "Blog not found" });
+      }
+      if (blogToDelete.user.toString() === user.id) {
+        await Blog.findByIdAndDelete(request.params.id);
+        response
+          .status(204)
+          .json({ message: "Success ! Blog has been deleted" })
+          .end();
+      } else {
+        response.status(401).json({
+          error: "unauthorized deletion : you are not the creator of this blog",
+        });
+      }
+    }
   } catch (error) {
     next(error);
   }
