@@ -1,23 +1,26 @@
 import { useState, useEffect } from 'react'
-import Blog from './components/Blog'
-import blogService from './services/blogs'
+import LoginForm from './components/LoginForm'
+import BlogsList from './components/BlogsList'
+import LoggedInUserInfo from './components/LoggedInUserInfo'
+import CreateBlog from './components/CreateBlog'
 
 const App = () => {
+  const persistentUser = window.localStorage.getItem('loggedIn-user')
+  const [user, setUser] = useState(persistentUser)
   const [blogs, setBlogs] = useState([])
 
-  useEffect(() => {
-    blogService.getAll().then(blogs =>
-      setBlogs( blogs )
-    )  
-  }, [])
-
   return (
-    <div>
-      <h2>blogs</h2>
-      {blogs.map(blog =>
-        <Blog key={blog.id} blog={blog} />
+    <>
+      {user ? (
+        <>
+          <LoggedInUserInfo user={user} setUser={setUser} />
+          <CreateBlog setBlogs={setBlogs} />
+          <BlogsList blogs={blogs} setBlogs={setBlogs} user={user} />
+        </>
+      ) : (
+        <LoginForm setUser={setUser} />
       )}
-    </div>
+    </>
   )
 }
 
