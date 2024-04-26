@@ -2,10 +2,9 @@ import { useEffect, useState } from 'react'
 import loginService from '../services/login'
 import Toast from './Toast'
 
-const LoginForm = ({ setUser }) => {
+const LoginForm = ({ user, setUser, message, setMessage }) => {
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
-  const [message, setMessage] = useState(null)
   const [showForm, setShowForm] = useState(false)
   const handleSubmit = async (event) => {
     try {
@@ -34,7 +33,7 @@ const LoginForm = ({ setUser }) => {
 
   return (
     <div>
-      {showForm && (
+      {!user || !user.username || showForm ? (
         <>
           <h1>Login</h1>
           <form>
@@ -63,11 +62,11 @@ const LoginForm = ({ setUser }) => {
             </button>
           </form>
         </>
+      ) : (
+        <button onClick={() => setShowForm(!showForm)}>
+          {showForm ? 'cancel' : 'login'}
+        </button>
       )}
-      {message && <Toast content={message} />}
-      <button onClick={() => setShowForm(!showForm)}>
-        {showForm ? 'cancel' : 'login'}
-      </button>
     </div>
   )
 }

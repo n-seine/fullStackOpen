@@ -38,6 +38,15 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InVzZ
   "url": "www.newpost.com",
   "likes": "43"}
 
+###
+PUT http://localhost:3003/api/blogs/66291b2d73b1c5f1b63f944e  HTTP/1.1
+Content-Type: application/json
+
+{"likes": "45", 
+"author": "Marcel Proust",
+"url": "www.newpost.com",
+"title": "A new post"}
+
 
 ###
 DELETE http://localhost:3003/api/blogs/66251c40de0add91d24c3a22 HTTP/1.1

@@ -15,8 +15,8 @@ userRouter.get("/", async (request, response, next) => {
 userRouter.post("/", async (request, response, next) => {
   try {
     const { username, name, password } = request.body;
+    console.log(username, name, password);
     if (!password || password.length < 3) {
-      console.log("password too short");
       return response
         .status(400)
         .json({ error: "password must be at least 3 characters long" });

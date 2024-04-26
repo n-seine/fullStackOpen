@@ -6,6 +6,7 @@ import PropTypes from 'prop-types'
 const BlogsList = ({ blogs, setBlogs }) => {
   useEffect(() => {
     blogService.getAll().then((blogs) => setBlogs(blogs))
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   return (
